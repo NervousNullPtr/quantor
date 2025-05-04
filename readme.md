@@ -20,7 +20,7 @@
 
 ---
 
-## 🚀 Example
+## Example
 
 ```rust
 use quantor::{forall, select_where, assert_forall};
