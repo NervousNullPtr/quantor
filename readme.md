@@ -1,7 +1,6 @@
 # quantor
 [![Crates.io](https://img.shields.io/crates/v/quantor.svg)](https://crates.io/crates/quantor)
 [![Docs.rs](https://docs.rs/quantor/badge.svg)](https://docs.rs/quantor)
-[![License](https://img.shields.io/crates/l/quantor)](https://crates.io/crates/quantor)
 [![Downloads](https://img.shields.io/crates/d/quantor.svg)](https://crates.io/crates/quantor)
 [![MSRV](https://img.shields.io/badge/MSRV-1.61+-blue)](https://github.com/nervousnullptr/quantor#msrv)
 
