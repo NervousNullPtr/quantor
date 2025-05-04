@@ -30,7 +30,7 @@ where
     };
 
     for curr in iter {
-        if !pred(&prev, &curr) {
+        if !pred(prev, curr) {
             return false;
         }
         prev = curr;

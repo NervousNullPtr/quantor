@@ -107,7 +107,7 @@ where
 {
     let mut matched = 0;
     for item in iter {
-        if pred(&item) {
+        if pred(item) {
             matched += 1;
             if matched > 1 {
                 return false;
@@ -140,12 +140,12 @@ where
 /// assert!(!all_equal(&natural));
 /// ```
 #[inline]
-pub fn all_equal<'a, I, T: 'a>(iter: I) -> bool
+pub fn all_equal<'a, I, T>(iter: I) -> bool
 where
     I: IntoIterator<Item = &'a T>,
-    T: Eq
+    T: 'a + Eq
 {
     let mut iter = iter.into_iter();
 
-    iter.next().map_or(true, |first| iter.all(|item| item == first))
+    iter.next().is_none_or(|first| iter.all(|item| item == first))
 }

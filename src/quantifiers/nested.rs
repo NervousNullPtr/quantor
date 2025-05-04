@@ -65,6 +65,6 @@ pub fn existsforall<'a, A: 'a, B: 'a>(
 ) -> bool {
     let a_collected: Vec<&'a A> = a.into_iter().collect(); // store all A's
     b.into_iter().any(|item_b| {
-        a_collected.iter().all(|item_a| pred(item_a, &item_b))
+        a_collected.iter().all(|item_a| pred(item_a, item_b))
     })
 }

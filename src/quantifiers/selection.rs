@@ -44,18 +44,18 @@ where
 /// 
 /// assert_eq!(select_unique(&numbers, |x| x % 2 == 0), vec!(&0, &2));
 /// ```
-pub fn select_unique<'a, I, T: 'a, F>(iter: I, pred: F) -> Vec<&'a T>
+pub fn select_unique<'a, I, T, F>(iter: I, pred: F) -> Vec<&'a T>
 where
     I: IntoIterator<Item = &'a T>,
-    T: Eq + Hash,
+    T: 'a + Eq + Hash,
     F: Fn(&T) -> bool,
 {
     let mut uniques = HashSet::new();
     let mut result  = Vec::new();
 
     for item in iter {
-        if pred(&item) {
-            if !uniques.contains(item) { // Nested if to avoid unnecessary clone when pred fails.
+        if pred(item) {
+            if !uniques.contains(item) { // Avoids redundant insertion/check.
                 uniques.insert(item);
                 result.push(item);
             }
@@ -80,10 +80,10 @@ where
 /// 
 /// assert_eq!(select_duplicates(&numbers), vec!(&2));
 /// ```
-pub fn select_duplicates<'a, I, T: 'a>(iter: I) -> Vec<&'a T>
+pub fn select_duplicates<'a, I, T>(iter: I) -> Vec<&'a T>
 where
     I: IntoIterator<Item = &'a T>,
-    T: Eq + Hash + Clone,
+    T: 'a + Eq + Hash + Clone,
 {
     let mut counts = HashMap::new();
     
