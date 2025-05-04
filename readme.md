@@ -52,4 +52,4 @@ Optional features:
 
 ## 📚 Documentation
 
-See docs.rs/quantor for full API documentation and examples.
+See [docs.rs](https://docs.rs/quantor) for full API documentation and examples.
