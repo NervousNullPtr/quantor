@@ -22,7 +22,7 @@ use crate::QuantorError;
 /// assert!(pairwise(&numbers, |a, b| a < b).is_ok());
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn pairwise<'a, I, T: 'a, F>(iter: I, pred: F) -> Result<(), QuantorError>
 where
     I: IntoIterator<Item = &'a T>,
@@ -61,7 +61,7 @@ where
 /// assert_eq!(failing_elements(&numbers, |x| x % 2 == 0), vec!(&1, &3));
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Use this to inspect failing elements from a quantifier."]
 pub fn failing_elements<'a, I, T: 'a, F>(iter: I, pred: F) -> Vec<&'a T>
 where
     I: IntoIterator<Item = &'a T>,

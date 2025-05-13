@@ -46,7 +46,7 @@ pub fn function_name(_attr: TokenStream, input: TokenStream) -> TokenStream {
                     output.push(TokenTree::Ident(name)); // push function name
 
                     // Copy everything until `{`
-                    while let Some(next_token) = tokens.next() {
+                    for next_token in tokens.by_ref() {
                         match &next_token {
                             TokenTree::Group(group) if group.delimiter() == Delimiter::Brace => {
                                 let original_body = group.stream();

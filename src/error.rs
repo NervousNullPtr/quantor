@@ -88,7 +88,6 @@ pub trait QuantorResultExt {
     /// - `Some(index)` if the underlying [`QuantorError`] variant includes a specific index indicating
     ///   which element caused the quantifier to fail.
     /// - `None` if the error variant does not include index information (e.g. `NoMatch`, `Custom`).
-    /// use quantor::{quantifiers::forall, error::QuantorResultExt};
     /// ## Example
     /// ```
     /// use quantor::{forall, error::QuantorResultExt};
@@ -102,7 +101,6 @@ pub trait QuantorResultExt {
     ///     assert_eq!(2, index); // `5` fails the even check
     /// }
     /// ```
-    #[must_use]
     fn failing_index(&self) -> Option<usize>;
     /// Returns the number of elements that matched the predicate,
     /// if available from the underlying [`QuantorError`] variant.
@@ -127,7 +125,6 @@ pub trait QuantorResultExt {
     ///     assert_eq!(count, 3); // we matched 3, expected only 2
     /// }
     /// ```
-    #[must_use]
     fn match_count(&self) -> Option<usize>;
 }
 
@@ -153,19 +150,13 @@ impl QuantorError {
     #[inline]
     #[must_use]
     pub fn is_predicate_failed(&self) -> bool {
-        match self {
-            QuantorError::PredicateFailed {..} => true,
-            _ => false
-        }
+        matches!(self, QuantorError::PredicateFailed {..})
     }
 
     #[inline]
     #[must_use]
     pub fn is_no_match(&self) -> bool {
-        match self {
-            QuantorError::NoMatch => true,
-            _ => false
-        }
+        matches!(self, QuantorError::NoMatch)
     }
 
     #[inline]

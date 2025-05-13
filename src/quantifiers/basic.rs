@@ -29,7 +29,7 @@ use crate::QuantorError;
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn forall<'a, I, T: 'a, F>(iter: I, pred: F) -> Result<(), QuantorError>
 where
     I: IntoIterator<Item = &'a T>,
@@ -64,7 +64,7 @@ where
 /// assert!(exists(&bad, |x| x % 2 == 0).is_err());
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn exists<'a, I, T: 'a, F>(iter: I, pred: F) -> Result<(), QuantorError>
 where
     I: IntoIterator<Item = &'a T>,
@@ -104,7 +104,7 @@ where
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn none<'a, I, T: 'a, F>(iter: I, pred: F) -> Result<(), QuantorError>
 where
     I: IntoIterator<Item = &'a T>,
@@ -143,7 +143,7 @@ where
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn exactly_one<'a, I, T: 'a, F>(iter: I, pred: F) -> Result<(), QuantorError>
 where
     I: IntoIterator<Item = &'a T>,
@@ -189,7 +189,7 @@ where
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn all_equal<'a, I, T>(iter: I) -> Result<(), QuantorError>
 where
     I: IntoIterator<Item = &'a T>,
@@ -235,7 +235,7 @@ where
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn exactly_n<'a, I, T: 'a, F>(
     iter: I,
     n: usize,
