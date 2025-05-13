@@ -56,7 +56,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∀x ∈ self: pred(x)_**.  
     /// See [`crate::quantifiers::basic::forall`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn forall<F>(&self, pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T) -> bool;
@@ -69,7 +69,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∃x ∈ self: pred(x)_**.  
     /// See [`crate::quantifiers::basic::exists`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn exists<F>(&self, pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T) -> bool;
@@ -82,7 +82,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∀x ∈ self: ¬pred(x)_**.  
     /// See [`crate::quantifiers::basic::none`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn none<F>(&self, pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T) -> bool;
@@ -95,7 +95,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∃!x ∈ self: pred(x)_**.  
     /// See [`crate::quantifiers::basic::exactly_one`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn exactly_one<F>(&self, pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T) -> bool;
@@ -108,7 +108,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_|{x ∈ self | pred(x)}| = n_**.  
     /// See [`crate::quantifiers::basic::exactly_n`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn exactly_n<F>(&self, n: usize, pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T) -> bool;
@@ -121,7 +121,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∀x, y ∈ self: x = y_**.  
     /// See [`crate::quantifiers::basic::all_equal`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn all_equal(&self) -> Result<(), QuantorError>
     where
         T: Eq;
@@ -135,7 +135,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∀x ∈ self ∃y ∈ rhs: pred(x, y)_**.  
     /// See [`crate::quantifiers::nested::forallexists`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn forallexists<U, F>(&self, rhs: &[U], pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T, &U) -> bool;
@@ -149,7 +149,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∃x ∈ self ∀y ∈ rhs: pred(x, y)_**.  
     /// See [`crate::quantifiers::nested::existsforall`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn existsforall<U, F>(&self, rhs: &[U], pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T, &U) -> bool;
@@ -162,7 +162,7 @@ pub trait QuantorExt<T> {
     ///
     /// Equivalent to **_∀(aᵢ, aᵢ₊₁) ∈ self: pred(aᵢ, aᵢ₊₁)_**.  
     /// See [`crate::quantifiers::structured::pairwise`] for details.
-    #[must_use]
+    #[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
     fn pairwise<F>(&self, pred: F) -> Result<(), QuantorError>
     where
         F: Fn(&T, &T) -> bool;

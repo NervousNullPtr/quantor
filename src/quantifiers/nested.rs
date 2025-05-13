@@ -31,7 +31,7 @@ use crate::QuantorError;
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn forallexists<'a, A: 'a, B: 'a>(
     a: impl IntoIterator<Item = &'a A>,
     b: impl IntoIterator<Item = &'a B>,
@@ -86,7 +86,7 @@ pub fn forallexists<'a, A: 'a, B: 'a>(
 /// }
 /// ```
 #[inline]
-#[must_use]
+#[must_use = "Quantifier results must be checked. Use `.is_ok()` or `?` to handle them."]
 pub fn existsforall<'a, A: 'a, B: 'a>(
     a: impl IntoIterator<Item = &'a A>,
     b: impl IntoIterator<Item = &'a B>,
