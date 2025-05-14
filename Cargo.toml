@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 include = ["src/**/*", "README.md", "LICENSE*", "Cargo.toml"]
 
 [package.metadata.docs.rs]
-features = ["debug-tools", "method-api"]
+all-features = true
 
 [dependencies]
 quantor_fnmeta = { path = "fnmeta" }  # internal crate
