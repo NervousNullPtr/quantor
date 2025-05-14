@@ -79,7 +79,7 @@ This is readable, declarative, and robust – and every check returns a Result w
 ## Installation
 Add `quantor` to your `Cargo.toml`:
 ```
-quantor = "0.1"
+quantor = "0.9"
 ```
 Optional features:
 * `method-api` — Enables `.forall()`, `.exists()`, `.select_where()`, etc. on slices and iterators.
