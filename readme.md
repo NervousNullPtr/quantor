@@ -7,7 +7,7 @@
 **Declarative logic for iterators and collections.**  
 `quantor` lets you express conditions like `forall`, `exists`, `none`, and `existsforall` directly over data — making filtering, validation, and testing expressive, readable, and idiomatic.
 
-## Why Quantor?
+## Why quantor?
 
 Rust's iterator methods are powerful, but when you want to write logic that reads like:
 
@@ -27,37 +27,54 @@ With `quantor`, your code becomes declarative and reflects the logic you care ab
 - **Diagnostics** — Inspect failing indices, collect mismatches, or integrate with fuzzing tools using `QuantorError`.
 - **Rust-native, ergonomic API** – Works with any `IntoIterator`, zero dependencies, and optional `.method()` trait extension.
 
-## Example
+## Example & Comparison
 
-If you're validating input for a product catalog:
+If you're validating product data from an online shop:
 
 ```rust
-use quantor::{forall, exists, pairwise, assert_unique};
+use quantor::{forall, existsforall, quantify, assert_unique};
 
 #[derive(Debug)]
 struct Product {
     id:     u32,
     price:  f64,
-    active: bool,
+    tags:   Vec<&'static str>,
+}
+
+#[derive(Debug)]
+struct Policy {
+    required_tag: &'static str,
 }
 
 let products = vec![
-    Product { id: 1, price: 19.99, active: true },
-    Product { id: 2, price: 29.99, active: true },
-    Product { id: 3, price: 0.0,   active: false },
+    Product { id: 1, price: 19.99, tags: vec!["organic", "new"] },
+    Product { id: 2, price: 29.99, tags: vec!["new", "eco"] },
+    Product { id: 3, price: 49.99, tags: vec!["premium"] },
 ];
 
-// Check that all active products have a price > 0.
-forall(&products, |p| !p.active || p.price > 0.0)?;
+let policies = vec![
+    Policy { required_tag: "new" },
+    Policy { required_tag: "eco" },
+];
 
-// Ensure IDs are unique.
+// All quantify!-macro options reside as functions in the quantor crate.
+
+// Each policy must be satisfied by at least one product.
+quantify!(forallexists p in &policies, prod in &products =>
+    prod.tags.contains(&p.required_tag)
+)?;
+
+// At least one product is eco-friendly.
+quantify!(exists p in &products => p.tags.contains(&"eco"))?;
+
+// All products are priced.
+forall(&products, |p| p.price > 0.0)?;
+
+// IDs are unique.
 assert_unique!(&products.iter().map(|p| p.id).collect::<Vec<_>>());
-
-// Confirm at least one product is available.
-exists(&products, |p| p.active)?;
 ```
 
-This is readable, declarative, and robust – and every check returns a Result with index-level error diagnostics.
+This is readable, declarative, and robust – and every check returns a Result with index-level error diagnostics, while the `quantify!` macro makes sure you can write conditions comfortably.
 
 ## Installation
 Add `quantor` to your `Cargo.toml`:
@@ -71,3 +88,18 @@ Optional features:
 ## 📚 Documentation
 
 See [docs.rs](https://docs.rs/quantor) for full API documentation and examples.
+
+
+## FAQ
+
+**Why does `forall` return `Result<(), QuantorError>` instead of `bool`?**  
+Because failed logical checks are diagnostics, not just `false`. You get indexed errors and rich messages, not just silent failures.
+
+**What’s the difference between `select_where` and `.filter()`?**  
+`select_where` is a semantic wrapper — it describes intent. It’s also easier to reuse and test.
+
+## Contributing & Feedback
+
+If `quantor` made your validation or test code cleaner, I'd love to hear about it.
+
+Have ideas? Open an issue or PR!
