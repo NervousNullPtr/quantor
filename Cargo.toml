@@ -17,6 +17,3 @@ all-features = true
 default = []
 debug-tools = []
 method-api = []
-
-[workspace]
-members = ["fnmeta"]
