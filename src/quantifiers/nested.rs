@@ -7,6 +7,8 @@ use crate::QuantorError;
 /// Checks whether for every element in `a`, there exists at least one element in `b` for which the predicate holds.
 /// 
 /// Equivalent to **_∀x ∈ a ∃y ∈ b: pred(x, y)_**.
+/// 
+/// **Note**: _If `b` is empty and `a` is not, this will always return an error._
 /// ## Arguments
 /// - `a` - The source collection (outer quantifier).
 /// - `b` - The comparison collection.
@@ -68,7 +70,7 @@ pub fn forallexists<'a, A: 'a, B: 'a>(
 /// - `pred` - The binary predicate to check against.
 /// ## Returns
 /// - `Ok(())` if there exists at least one element in the left-hand collection (`a`) such that the condition holds against all elements in the right-hand collection (`b`).
-/// - `Err(QuantorError::ExistsForAllFailed { outer_index })` if no such `a` is found.
+/// - `Err(QuantorError::ExistsForAllFailed { outer_index })` if no such element exists, where `outer_index` is the index of the first failing `a` element.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::existsforall, error::QuantorResultExt};
@@ -93,10 +95,9 @@ pub fn existsforall<'a, A: 'a, B: 'a>(
     pred: impl Fn(&A, &B) -> bool,
 ) -> Result<(), QuantorError> {
     let b_vec: Vec<&'a B> = b.into_iter().collect();
-    let mut last_index = 0;
+    let mut first_index = None;
 
     for (index, item_a) in a.into_iter().enumerate() {
-        last_index = index;
         let mut all_match = true;
 
         for item_b in &b_vec {
@@ -109,7 +110,11 @@ pub fn existsforall<'a, A: 'a, B: 'a>(
         if all_match {
             return Ok(());
         }
+
+        if first_index.is_none() {
+            first_index = Some(index)
+        }
     }
 
-    Err(QuantorError::ExistsForAllFailed { outer_index: last_index })
+    Err(QuantorError::ExistsForAllFailed { outer_index: first_index.unwrap_or(0) })
 }
