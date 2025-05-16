@@ -34,12 +34,15 @@ where
         None => return Ok(())
     };
 
-    for (i, curr) in iter.enumerate() {
+    let mut index = 0;
+
+    for curr in iter {
         if !pred(prev, curr) {
             // Index `i` here refers to the second item in the failing pair.
-            return Err(QuantorError::PairwiseFailed { index: i });
+            return Err(QuantorError::PairwiseFailed { index });
         }
         prev = curr;
+        index += 1;
     }
 
     Ok(())
