@@ -81,18 +81,31 @@ pub enum QuantorError {
     Custom(&'static str),
 }
 
-/// Represents the kind of quantifier or logic that failed.
+/// Represents the type of quantifier used in a logical check.
+///
+/// Used in error variants to indicate which quantifier produced the failure,
+/// and for introspection via [`QuantorError::kind()`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuantorKind {
+    /// Universal quantifier (`forall`): all elements must satisfy the predicate.
     Forall,
+    /// Existential quantifier (`exists`): at least one element must satisfy the predicate.
     Exists,
+    /// Negated existential quantifier (`none`): no elements may satisfy the predicate.
     None,
+    /// True if exactly one element satisfies the predicate.
     ExactlyOne,
+    /// True if the number of matching elements equals the given count.
     ExactlyN,
+    /// True if all elements are equal (via `PartialEq`).
     AllEqual,
+    /// True if every adjacent pair satisfies the predicate.
     Pairwise,
+    /// Nested quantifier: for every element in `A`, some element in `B` satisfies a predicate.
     ForAllExists,
+    /// Nested quantifier: some element in `A` satisfies a predicate for all elements in `B`.
     ExistsForAll,
+    /// Fallback for custom or user-defined logic.
     Custom,
 }
 
@@ -188,18 +201,71 @@ impl fmt::Display for QuantorKind {
 }
 
 impl QuantorError {
+    /// Returns `true` if the quantifier failed due to a predicate mismatch.
+    ///
+    /// Useful for identifying simple predicate failures, such as those from `forall` or `exactly_one`.
+    ///
+    /// ## Returns
+    /// - `true` if the error variant is [`QuantorError::PredicateFailed`].
+    /// - `false` otherwise.
+    ///
+    /// ## Example
+    /// ```
+    /// use quantor::{forall, error::QuantorResultExt};
+    ///
+    /// let nums = vec![1, 2, 3];
+    /// let result = forall(&nums, |x| *x < 3);
+    ///
+    /// assert!(result.is_err());
+    /// assert!(result.unwrap_err().is_predicate_failed());
+    /// ```
     #[inline]
     #[must_use]
     pub fn is_predicate_failed(&self) -> bool {
         matches!(self, QuantorError::PredicateFailed {..})
     }
 
+    /// Returns `true` if the quantifier failed because no element matched the predicate.
+    ///
+    /// Typically used with `exists` or `existsforall` where at least one match is expected.
+    ///
+    /// ## Returns
+    /// - `true` if the error variant is [`QuantorError::NoMatch`].
+    /// - `false` otherwise.
+    ///
+    /// ## Example
+    /// ```
+    /// use quantor::{exists, error::QuantorResultExt};
+    ///
+    /// let nums = [1, 2, 3];
+    /// let result = exists(&nums, |x| *x > 10);
+    ///
+    /// assert!(result.is_err());
+    /// assert!(result.unwrap_err().is_no_match());
+    /// ```
     #[inline]
     #[must_use]
     pub fn is_no_match(&self) -> bool {
         matches!(self, QuantorError::NoMatch { .. })
     }
 
+    /// Returns the [`QuantorKind`] associated with this error.
+    ///
+    /// Allows inspection of which quantifier failed, regardless of the specific error variant.
+    ///
+    /// ## Returns
+    /// - A [`QuantorKind`] value corresponding to the quantifier that produced the error.
+    /// - [`QuantorKind::Custom`] for generic errors.
+    ///
+    /// ## Example
+    /// ```
+    /// use quantor::{forall, error::{QuantorKind, QuantorResultExt}};
+    ///
+    /// let nums = [1, 2, 3];
+    /// let result = forall(&nums, |x| *x > 3);
+    ///
+    /// assert_eq!(result.unwrap_err().kind(), QuantorKind::Forall);
+    /// ```
     #[inline]
     #[must_use]
     pub fn kind(&self) -> QuantorKind {
