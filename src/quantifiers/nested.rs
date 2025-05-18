@@ -15,7 +15,7 @@ use crate::{error::QuantorKind, QuantorError};
 /// - `pred` - The binary predicate to check against.
 /// ## Returns
 /// - `Ok(())` if every element in the left-hand collection (`a`) satisfies the condition against at least one element in the right-hand collection (`b`).
-/// - `Err(QuantorError::ForAllExistsFailed { outer_index })` if any `a` fails to match.
+/// - `Err(QuantorError::ForAllExistsFailed { kind, outer_index })` if any `a` fails to match.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::forallexists, error::QuantorResultExt};
@@ -70,7 +70,7 @@ pub fn forallexists<'a, A: 'a, B: 'a>(
 /// - `pred` - The binary predicate to check against.
 /// ## Returns
 /// - `Ok(())` if there exists at least one element in the left-hand collection (`a`) such that the condition holds against all elements in the right-hand collection (`b`).
-/// - `Err(QuantorError::ExistsForAllFailed { outer_index })` if no such element exists, where `outer_index` is the index of the first failing `a` element.
+/// - `Err(QuantorError::ExistsForAllFailed { kind, outer_index })` if no such element exists, where `outer_index` is the index of the first failing `a` element.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::existsforall, error::QuantorResultExt};

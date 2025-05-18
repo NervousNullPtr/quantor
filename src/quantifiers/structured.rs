@@ -12,7 +12,7 @@ use crate::{error::QuantorKind, QuantorError};
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if the predicate holds for all adjacent pairs.
-/// - `Err(QuantorError::PairwiseFailed { index })` if any pair violates the predicate.
+/// - `Err(QuantorError::PairwiseFailed { kind, index })` if any pair violates the predicate.
 /// ## Example
 /// ```
 /// use quantor::quantifiers::pairwise;
