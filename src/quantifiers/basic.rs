@@ -3,7 +3,7 @@
 //!
 //! Useful in validation, invariant checks, and test assertions.
 
-use crate::QuantorError;
+use crate::{error::{QuantorKind}, QuantorError};
 
 /// Checks if all elements satisfy the predicate.
 /// 
@@ -38,7 +38,7 @@ where
 {
     for (i, item) in iter.into_iter().enumerate() {
         if !pred(item) {
-            return Err(QuantorError::PredicateFailed { index: i })
+            return Err(QuantorError::PredicateFailed { kind: QuantorKind::Forall, index: i })
         }
     }
 
@@ -78,7 +78,7 @@ where
         }
     }
 
-    Err(QuantorError::NoMatch)
+    Err(QuantorError::NoMatch {kind: QuantorKind::Exists})
 }
 
 /// Checks if no element satisfies the predicate.
@@ -114,7 +114,7 @@ where
 {
     for (index, item) in iter.into_iter().enumerate() {
         if pred(item) {
-            return Err(QuantorError::UnexpectedMatch { index });
+            return Err(QuantorError::UnexpectedMatch { kind: QuantorKind::None, index });
         }
     }
 
@@ -151,13 +151,22 @@ where
     I: IntoIterator<Item = &'a T>,
     F: Fn(&T) -> bool,
 {
+    let mut iter = iter.into_iter().enumerate().peekable();
+
+    // Check for empty input
+    if iter.peek().is_none() {
+        return Err(QuantorError::EmptyInput {
+            kind: QuantorKind::ExactlyOne,
+        });
+    }
+
     let mut matched = 0;
 
-    for (index, item) in iter.into_iter().enumerate() {
+    for (index, item) in iter {
         if pred(item) {
             matched += 1;
             if matched > 1 {
-                return Err(QuantorError::UnexpectedMatch { index });
+                return Err(QuantorError::UnexpectedMatch { kind: QuantorKind::ExactlyOne, index });
             }
         }
     }
@@ -165,7 +174,10 @@ where
     if matched == 1 {
         Ok(())
     } else {
-        Err(QuantorError::PredicateFailed { index: 0 })
+        Err(QuantorError::PredicateFailed {
+            kind: QuantorKind::ExactlyOne,
+            index: 0,
+        })
     }
 }
 
@@ -206,7 +218,7 @@ where
     if let Some(first) = iter.next() {
         for (i, item) in iter.enumerate() {
             if item != first {
-                return Err(QuantorError::NotAllEqual { index: i + 1 });
+                return Err(QuantorError::NotAllEqual { kind: QuantorKind::AllEqual, index: i + 1 });
             }
         }
     }
@@ -257,6 +269,6 @@ where
     if found == n {
         Ok(())
     } else {
-        Err(QuantorError::ExactlyNFailed { found, expected: n })
+        Err(QuantorError::ExactlyNFailed { kind: QuantorKind::ExactlyN, found, expected: n })
     }
 }

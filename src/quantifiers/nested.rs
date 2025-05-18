@@ -2,7 +2,7 @@
 //!
 //! These are helpful for modeling containment, dominance, or existential constraints in rule engines.
 
-use crate::QuantorError;
+use crate::{error::QuantorKind, QuantorError};
 
 /// Checks whether for every element in `a`, there exists at least one element in `b` for which the predicate holds.
 /// 
@@ -54,7 +54,7 @@ pub fn forallexists<'a, A: 'a, B: 'a>(
         }
 
         if !matched {
-            return Err(QuantorError::ForAllExistsFailed { outer_index });
+            return Err(QuantorError::ForAllExistsFailed { kind: QuantorKind::ForAllExists, outer_index });
         }
     }
 
@@ -94,7 +94,7 @@ pub fn existsforall<'a, A: 'a, B: 'a>(
     b: impl IntoIterator<Item = &'a B>,
     pred: impl Fn(&A, &B) -> bool,
 ) -> Result<(), QuantorError> {
-    
+
     let b_vec: Vec<&'a B> = b.into_iter().collect();
     let mut first_index = None;
 
@@ -117,5 +117,5 @@ pub fn existsforall<'a, A: 'a, B: 'a>(
         }
     }
 
-    Err(QuantorError::ExistsForAllFailed { outer_index: first_index.unwrap_or(0) })
+    Err(QuantorError::ExistsForAllFailed { kind: QuantorKind::ExistsForAll, outer_index: first_index.unwrap_or(0) })
 }
