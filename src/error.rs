@@ -16,7 +16,7 @@ use std::fmt;
 /// Error type returned by fallible quantifier evaluations in `quantor`.
 #[derive(PartialEq, Eq)]
 pub enum QuantorError {
-    /// Returned when a predicate fails during a `forall` check.
+    /// Returned when a predicate fails during a `forall` check. When `exactly_one` receives an empty input, the `index` is `0`.
     PredicateFailed {
         /// The index of the first failing element.
         index: usize

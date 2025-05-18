@@ -8,6 +8,7 @@ use crate::QuantorError;
 /// Checks if all elements satisfy the predicate.
 /// 
 /// Equivalent to **_∀a ∈ iter: pred(a)_**.
+/// When `a` is `∅`, this returns `ok(())` because there is no counterexample.
 /// ## Arguments
 /// - `iter` - The collection to be checked.
 /// - `pred` - The predicate to test each element against.
@@ -47,6 +48,7 @@ where
 /// Checks if at least one element satisfies the predicate.
 /// 
 /// Equivalent to **_∃a ∈ iter: pred(a)_**.
+/// When `a` is `∅`, this returns `QuantorError` because there is no element that can satisfy `pred`.
 /// ## Arguments
 /// - `iter` - The collection to be checked.
 /// - `pred` - The predicate to test each element against.
@@ -150,6 +152,7 @@ where
     F: Fn(&T) -> bool,
 {
     let mut matched = 0;
+
     for (index, item) in iter.into_iter().enumerate() {
         if pred(item) {
             matched += 1;
@@ -159,7 +162,11 @@ where
         }
     }
 
-    Ok(())
+    if matched == 1 {
+        Ok(())
+    } else {
+        Err(QuantorError::PredicateFailed { index: 0 })
+    }
 }
 
 /// Checks if all elements are equal to each other.

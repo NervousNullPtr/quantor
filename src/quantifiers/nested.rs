@@ -94,6 +94,7 @@ pub fn existsforall<'a, A: 'a, B: 'a>(
     b: impl IntoIterator<Item = &'a B>,
     pred: impl Fn(&A, &B) -> bool,
 ) -> Result<(), QuantorError> {
+    
     let b_vec: Vec<&'a B> = b.into_iter().collect();
     let mut first_index = None;
 
