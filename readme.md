@@ -2,7 +2,7 @@
 [![Crates.io](https://img.shields.io/crates/v/quantor.svg)](https://crates.io/crates/quantor)
 [![Docs.rs](https://docs.rs/quantor/badge.svg)](https://docs.rs/quantor)
 [![Downloads](https://img.shields.io/crates/d/quantor.svg)](https://crates.io/crates/quantor)
-[![MSRV](https://img.shields.io/badge/MSRV-1.58.1+-blue)](https://github.com/nervousnullptr/quantor#msrv)
+[![MSRV](https://img.shields.io/badge/MSRV-1.65.0+-blue)](https://github.com/nervousnullptr/quantor#msrv)
 
 **Declarative logic for iterators and collections.**  
 `quantor` lets you express conditions like `forall`, `exists`, `none`, and `existsforall` directly over data — making filtering, validation, and testing expressive, readable, and idiomatic.
@@ -79,7 +79,7 @@ This is readable, declarative, and robust – and every check returns a Result w
 ## Installation
 Add `quantor` to your `Cargo.toml`:
 ```
-quantor = "0.9"
+quantor = "0.10"
 ```
 Optional features:
 * `method-api` — Enables `.forall()`, `.exists()`, `.select_where()`, etc. on slices and iterators.
@@ -89,6 +89,9 @@ Optional features:
 
 See [docs.rs](https://docs.rs/quantor) for full API documentation and examples.
 
+## Changelog
+
+See [changelog.md](https://github.com/your-org/your-crate/blob/main/CHANGELOG.md) for version history.
 
 ## FAQ
 
