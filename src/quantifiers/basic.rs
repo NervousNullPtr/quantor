@@ -14,7 +14,7 @@ use crate::{error::{QuantorKind}, QuantorError};
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if all elements satisfy the predicate.
-/// - `Err(QuantorError::PredicateFailed { index })` if an element fails the predicate, with the index of the first failure.
+/// - `Err(QuantorError::PredicateFailed { kind, index })` if an element fails the predicate, with the index of the first failure.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::forall, error::QuantorResultExt};
@@ -54,7 +54,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if any element satisfies the predicate.
-/// - `Err(QuantorError::NoMatch)` if no element satisfies the predicate.
+/// - `Err(QuantorError::NoMatch { kind })` if no element satisfies the predicate.
 /// ## Example
 /// ```
 /// use quantor::quantifiers::exists;
@@ -89,7 +89,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if no elements satisfy the predicate.
-/// - `Err(QuantorError::UnexpectedMatch { index })` if at least one element satisfies the predicate, with the `index`.
+/// - `Err(QuantorError::UnexpectedMatch { kind, index })` if at least one element satisfies the predicate, with the `index`.
 ///
 /// ## Example
 /// ```
@@ -129,7 +129,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if exactly one element satisfies the predicate.
-/// - `Err(QuantorError::UnexpectedMatch { index })` when there is more than one element which satisfies the predicate, with the `index` of the second passing element.
+/// - `Err(QuantorError::UnexpectedMatch { kind, index })` when there is more than one element which satisfies the predicate, with the `index` of the second passing element.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::exactly_one, error::QuantorResultExt};
@@ -188,7 +188,7 @@ where
 /// - `iter` - The collection to be checked.
 /// ## Returns
 /// - `Ok(())` if all elements are equal to each other.
-/// - `Err(QuantorError::NotAllEqual { index })` if an element at `index` is not equal to the first element.
+/// - `Err(QuantorError::NotAllEqual { kind, index })` if an element at `index` is not equal to the first element.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::all_equal, error::QuantorResultExt};
@@ -236,7 +236,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if exactly `n` elements match.
-/// - `Err(QuantorError::ExactlyNFailed { found, expected })` otherwise.
+/// - `Err(QuantorError::ExactlyNFailed { kind, found, expected })` otherwise.
 /// ## Example
 /// ```
 /// use quantor::quantifiers::exactly_n;
