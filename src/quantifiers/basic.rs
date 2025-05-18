@@ -3,17 +3,18 @@
 //!
 //! Useful in validation, invariant checks, and test assertions.
 
-use crate::QuantorError;
+use crate::{error::{QuantorKind}, QuantorError};
 
 /// Checks if all elements satisfy the predicate.
 /// 
 /// Equivalent to **_∀a ∈ iter: pred(a)_**.
+/// When `a` is `∅`, this returns `ok(())` because there is no counterexample.
 /// ## Arguments
 /// - `iter` - The collection to be checked.
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if all elements satisfy the predicate.
-/// - `Err(QuantorError::PredicateFailed { index })` if an element fails the predicate, with the index of the first failure.
+/// - `Err(QuantorError::PredicateFailed { kind, index })` if an element fails the predicate, with the index of the first failure.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::forall, error::QuantorResultExt};
@@ -37,7 +38,7 @@ where
 {
     for (i, item) in iter.into_iter().enumerate() {
         if !pred(item) {
-            return Err(QuantorError::PredicateFailed { index: i })
+            return Err(QuantorError::PredicateFailed { kind: QuantorKind::Forall, index: i })
         }
     }
 
@@ -47,12 +48,13 @@ where
 /// Checks if at least one element satisfies the predicate.
 /// 
 /// Equivalent to **_∃a ∈ iter: pred(a)_**.
+/// When `a` is `∅`, this returns `QuantorError` because there is no element that can satisfy `pred`.
 /// ## Arguments
 /// - `iter` - The collection to be checked.
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if any element satisfies the predicate.
-/// - `Err(QuantorError::NoMatch)` if no element satisfies the predicate.
+/// - `Err(QuantorError::NoMatch { kind })` if no element satisfies the predicate.
 /// ## Example
 /// ```
 /// use quantor::quantifiers::exists;
@@ -76,7 +78,7 @@ where
         }
     }
 
-    Err(QuantorError::NoMatch)
+    Err(QuantorError::NoMatch {kind: QuantorKind::Exists})
 }
 
 /// Checks if no element satisfies the predicate.
@@ -87,7 +89,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if no elements satisfy the predicate.
-/// - `Err(QuantorError::UnexpectedMatch { index })` if at least one element satisfies the predicate, with the `index`.
+/// - `Err(QuantorError::UnexpectedMatch { kind, index })` if at least one element satisfies the predicate, with the `index`.
 ///
 /// ## Example
 /// ```
@@ -112,7 +114,7 @@ where
 {
     for (index, item) in iter.into_iter().enumerate() {
         if pred(item) {
-            return Err(QuantorError::UnexpectedMatch { index });
+            return Err(QuantorError::UnexpectedMatch { kind: QuantorKind::None, index });
         }
     }
 
@@ -127,7 +129,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if exactly one element satisfies the predicate.
-/// - `Err(QuantorError::UnexpectedMatch { index })` when there is more than one element which satisfies the predicate, with the `index` of the second passing element.
+/// - `Err(QuantorError::UnexpectedMatch { kind, index })` when there is more than one element which satisfies the predicate, with the `index` of the second passing element.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::exactly_one, error::QuantorResultExt};
@@ -149,17 +151,34 @@ where
     I: IntoIterator<Item = &'a T>,
     F: Fn(&T) -> bool,
 {
+    let mut iter = iter.into_iter().enumerate().peekable();
+
+    // Check for empty input
+    if iter.peek().is_none() {
+        return Err(QuantorError::EmptyInput {
+            kind: QuantorKind::ExactlyOne,
+        });
+    }
+
     let mut matched = 0;
-    for (index, item) in iter.into_iter().enumerate() {
+
+    for (index, item) in iter {
         if pred(item) {
             matched += 1;
             if matched > 1 {
-                return Err(QuantorError::UnexpectedMatch { index });
+                return Err(QuantorError::UnexpectedMatch { kind: QuantorKind::ExactlyOne, index });
             }
         }
     }
 
-    Ok(())
+    if matched == 1 {
+        Ok(())
+    } else {
+        Err(QuantorError::PredicateFailed {
+            kind: QuantorKind::ExactlyOne,
+            index: 0,
+        })
+    }
 }
 
 /// Checks if all elements are equal to each other.
@@ -169,7 +188,7 @@ where
 /// - `iter` - The collection to be checked.
 /// ## Returns
 /// - `Ok(())` if all elements are equal to each other.
-/// - `Err(QuantorError::NotAllEqual { index })` if an element at `index` is not equal to the first element.
+/// - `Err(QuantorError::NotAllEqual { kind, index })` if an element at `index` is not equal to the first element.
 /// ## Example
 /// ```
 /// use quantor::{quantifiers::all_equal, error::QuantorResultExt};
@@ -199,7 +218,7 @@ where
     if let Some(first) = iter.next() {
         for (i, item) in iter.enumerate() {
             if item != first {
-                return Err(QuantorError::NotAllEqual { index: i + 1 });
+                return Err(QuantorError::NotAllEqual { kind: QuantorKind::AllEqual, index: i + 1 });
             }
         }
     }
@@ -217,7 +236,7 @@ where
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if exactly `n` elements match.
-/// - `Err(QuantorError::ExactlyNFailed { found, expected })` otherwise.
+/// - `Err(QuantorError::ExactlyNFailed { kind, found, expected })` otherwise.
 /// ## Example
 /// ```
 /// use quantor::quantifiers::exactly_n;
@@ -250,6 +269,6 @@ where
     if found == n {
         Ok(())
     } else {
-        Err(QuantorError::ExactlyNFailed { found, expected: n })
+        Err(QuantorError::ExactlyNFailed { kind: QuantorKind::ExactlyN, found, expected: n })
     }
 }

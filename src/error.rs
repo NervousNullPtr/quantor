@@ -18,38 +18,60 @@ use std::fmt;
 pub enum QuantorError {
     /// Returned when a predicate fails during a `forall` check.
     PredicateFailed {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// The index of the first failing element.
         index: usize
     },
+    /// Returned when no elements are given.
+    EmptyInput {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind
+    },
     /// Returned when no element satisfies the predicate in an `exists` check.
-    NoMatch,
+    NoMatch {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind
+    },
     /// Returned when `none` or `exactly_one` fails.
     UnexpectedMatch {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// The index of the violating element.
         index: usize
     },
     /// Returned when not all elements are equal in `all_equal`.
     NotAllEqual {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// The index of the first element that is not equal to the other, previously checked elements.
         index: usize
     },
     /// Returned when a pair of adjacent elements fail a `pairwise` predicate.
     PairwiseFailed {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// The index of the first element in the failing pair.
         index: usize
     },
     /// Returned when a `forallexists` condition fails.
     ForAllExistsFailed {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// The index of the outer (left) element that failed.
         outer_index: usize
     },
     /// Returned when no left-side element satisfies the `existsforall` condition.
     ExistsForAllFailed {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// The index of the outer (left) element that failed.
         outer_index: usize
     },
     /// Returned when the number of matches does not equal the expected count.
     ExactlyNFailed {
+        /// The kind of quantifier that threw this error.
+        kind: QuantorKind,
         /// Number of matches found.
         found: usize,
         /// Number of matches expected.
@@ -59,18 +81,31 @@ pub enum QuantorError {
     Custom(&'static str),
 }
 
-/// Represents the kind of quantifier or logic that failed.
+/// Represents the type of quantifier used in a logical check.
+///
+/// Used in error variants to indicate which quantifier produced the failure,
+/// and for introspection via [`QuantorError::kind()`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuantorKind {
+    /// Universal quantifier (`forall`): all elements must satisfy the predicate.
     Forall,
+    /// Existential quantifier (`exists`): at least one element must satisfy the predicate.
     Exists,
+    /// Negated existential quantifier (`none`): no elements may satisfy the predicate.
     None,
+    /// True if exactly one element satisfies the predicate.
     ExactlyOne,
+    /// True if the number of matching elements equals the given count.
     ExactlyN,
+    /// True if all elements are equal (via `PartialEq`).
     AllEqual,
+    /// True if every adjacent pair satisfies the predicate.
     Pairwise,
+    /// Nested quantifier: for every element in `A`, some element in `B` satisfies a predicate.
     ForAllExists,
+    /// Nested quantifier: some element in `A` satisfies a predicate for all elements in `B`.
     ExistsForAll,
+    /// Fallback for custom or user-defined logic.
     Custom,
 }
 
@@ -133,38 +168,111 @@ impl fmt::Display for QuantorError {
         use QuantorError::*;
 
         match self {
-            PredicateFailed { index } => write!(f, "Predicate failed for element at index {}.", index),
-            NoMatch => write!(f, "No element satisfied the predicate."),
-            UnexpectedMatch { index } => write!(f, "Unexpected match found at index {}.", index),
-            NotAllEqual { index } => write!(f, "Element at index {} does not match the first element.", index),
-            PairwiseFailed { index } => write!(f, "Predicate failed for adjacent pair starting at index {}.", index),
-            ForAllExistsFailed { outer_index } => write!(f, "Element at index {} in the outer collection failed to match any right-hand value.", outer_index),
-            ExistsForAllFailed { outer_index } => write!(f, "Element at index {} in the left-hand collection failed the universal condition.", outer_index),
-            ExactlyNFailed { found, expected } => write!(f, "Expected {} elements to match, found {}.", expected, found),
+            PredicateFailed { kind, index } => write!(f, "Predicate failed for element at index {} of quantifier {}.", index, kind),
+            EmptyInput { kind } => write!(f, "Empty input for quantifier {}.", kind),
+            NoMatch { kind } => write!(f, "No element satisfied the predicate for quantifier {}.", kind),
+            UnexpectedMatch { kind, index } => write!(f, "Unexpected match found at index {} of quantifier {}.", index, kind),
+            NotAllEqual { kind, index } => write!(f, "Element at index {} of quantifier {} does not match the first element.", index, kind),
+            PairwiseFailed { kind, index } => write!(f, "Predicate failed for adjacent pair starting at index {} for quantifier {}.", index, kind),
+            ForAllExistsFailed { kind, outer_index } => write!(f, "Element at index {} in the outer collection failed to match any right-hand value for quantifier {}.", outer_index, kind),
+            ExistsForAllFailed { kind, outer_index } => write!(f, "Element at index {} in the left-hand collection failed the universal condition for quantifier {}.", outer_index, kind),
+            ExactlyNFailed { kind, found, expected } => write!(f, "Expected {} elements to match, found {} for quantifier {}.", expected, found, kind),
             Custom(msg) => write!(f, "{}", msg),
         }
     }
 }
 
+impl fmt::Display for QuantorKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let name = match self {
+            QuantorKind::Forall => "forall",
+            QuantorKind::Exists => "exists",
+            QuantorKind::None => "none",
+            QuantorKind::ExactlyOne => "exactly_one",
+            QuantorKind::Pairwise => "pairwise",
+            QuantorKind::ExactlyN => "exactly_n",
+            QuantorKind::AllEqual => "all_equal",
+            QuantorKind::ForAllExists => "forallexists",
+            QuantorKind::ExistsForAll => "existsforall",
+            QuantorKind::Custom => "custom",
+        };
+        write!(f, "{}", name)
+    }
+}
+
 impl QuantorError {
+    /// Returns `true` if the quantifier failed due to a predicate mismatch.
+    ///
+    /// Useful for identifying simple predicate failures, such as those from `forall` or `exactly_one`.
+    ///
+    /// ## Returns
+    /// - `true` if the error variant is [`QuantorError::PredicateFailed`].
+    /// - `false` otherwise.
+    ///
+    /// ## Example
+    /// ```
+    /// use quantor::{forall, error::QuantorResultExt};
+    ///
+    /// let nums = vec![1, 2, 3];
+    /// let result = forall(&nums, |x| *x < 3);
+    ///
+    /// assert!(result.is_err());
+    /// assert!(result.unwrap_err().is_predicate_failed());
+    /// ```
     #[inline]
     #[must_use]
     pub fn is_predicate_failed(&self) -> bool {
         matches!(self, QuantorError::PredicateFailed {..})
     }
 
+    /// Returns `true` if the quantifier failed because no element matched the predicate.
+    ///
+    /// Typically used with `exists` or `existsforall` where at least one match is expected.
+    ///
+    /// ## Returns
+    /// - `true` if the error variant is [`QuantorError::NoMatch`].
+    /// - `false` otherwise.
+    ///
+    /// ## Example
+    /// ```
+    /// use quantor::{exists, error::QuantorResultExt};
+    ///
+    /// let nums = [1, 2, 3];
+    /// let result = exists(&nums, |x| *x > 10);
+    ///
+    /// assert!(result.is_err());
+    /// assert!(result.unwrap_err().is_no_match());
+    /// ```
     #[inline]
     #[must_use]
     pub fn is_no_match(&self) -> bool {
-        matches!(self, QuantorError::NoMatch)
+        matches!(self, QuantorError::NoMatch { .. })
     }
 
+    /// Returns the [`QuantorKind`] associated with this error.
+    ///
+    /// Allows inspection of which quantifier failed, regardless of the specific error variant.
+    ///
+    /// ## Returns
+    /// - A [`QuantorKind`] value corresponding to the quantifier that produced the error.
+    /// - [`QuantorKind::Custom`] for generic errors.
+    ///
+    /// ## Example
+    /// ```
+    /// use quantor::{forall, error::{QuantorKind, QuantorResultExt}};
+    ///
+    /// let nums = [1, 2, 3];
+    /// let result = forall(&nums, |x| *x > 3);
+    ///
+    /// assert_eq!(result.unwrap_err().kind(), QuantorKind::Forall);
+    /// ```
     #[inline]
     #[must_use]
     pub fn kind(&self) -> QuantorKind {
         match self {
             QuantorError::PredicateFailed { .. } => QuantorKind::Forall,
-            QuantorError::NoMatch => QuantorKind::Exists,
+            QuantorError::EmptyInput { kind } => *kind,
+            QuantorError::NoMatch { .. } => QuantorKind::Exists,
             QuantorError::UnexpectedMatch { .. } => QuantorKind::None,
             QuantorError::NotAllEqual { .. } => QuantorKind::AllEqual,
             QuantorError::PairwiseFailed { .. } => QuantorKind::Pairwise,
@@ -201,10 +309,10 @@ impl QuantorResultExt for Result<(), QuantorError> {
     #[inline]
     fn failing_index(&self) -> Option<usize> {
         match self {
-            Err(QuantorError::PredicateFailed { index }) => Some(*index),
-            Err(QuantorError::UnexpectedMatch { index }) => Some(*index),
-            Err(QuantorError::PairwiseFailed { index }) => Some(*index),
-            Err(QuantorError::ForAllExistsFailed { outer_index }) => Some(*outer_index),
+            Err(QuantorError::PredicateFailed { index, .. }) => Some(*index),
+            Err(QuantorError::UnexpectedMatch { index, .. }) => Some(*index),
+            Err(QuantorError::PairwiseFailed { index, .. }) => Some(*index),
+            Err(QuantorError::ForAllExistsFailed { outer_index, .. }) => Some(*outer_index),
             _ => None,
         }
     }

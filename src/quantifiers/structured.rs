@@ -2,7 +2,7 @@
 //!
 //! These functions are useful in areas such as reporting or constrained filtering.
 
-use crate::QuantorError;
+use crate::{error::QuantorKind, QuantorError};
 
 /// Checks whether a binary predicate holds for all adjacent pairs.
 /// 
@@ -12,7 +12,7 @@ use crate::QuantorError;
 /// - `pred` - The predicate to test each element against.
 /// ## Returns
 /// - `Ok(())` if the predicate holds for all adjacent pairs.
-/// - `Err(QuantorError::PairwiseFailed { index })` if any pair violates the predicate.
+/// - `Err(QuantorError::PairwiseFailed { kind, index })` if any pair violates the predicate.
 /// ## Example
 /// ```
 /// use quantor::quantifiers::pairwise;
@@ -39,7 +39,7 @@ where
     for curr in iter {
         if !pred(prev, curr) {
             // Index `i` here refers to the second item in the failing pair.
-            return Err(QuantorError::PairwiseFailed { index });
+            return Err(QuantorError::PairwiseFailed { kind: QuantorKind::Pairwise, index });
         }
         prev = curr;
         index += 1;
