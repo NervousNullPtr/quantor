@@ -9,8 +9,8 @@
 /// - `none x in &a => predicate`
 /// - `exactly_one x in &a => predicate`
 /// - `exactly_n n x in &a => predicate`
-/// - `all_equal x in &a => predicate`
-/// - `pairwise x in &a => predicate`
+/// - `all_equal x in &a`
+/// - `pairwise x, y in &a => predicate`
 /// - `forallexists x in &a, y in &b => predicate`
 /// - `existsforall x in &a, y in &b => predicate`
 ///
@@ -32,6 +32,9 @@
 /// let a = vec!(1, 2);
 /// let b = vec!(3, 4);
 /// assert!(quantify!(forallexists x in &a, y in &b => x < y).is_ok());
+///
+/// let seq = vec!(1, 2, 3);
+/// assert!(quantify!(pairwise a, b in &seq => a < b).is_ok());
 /// ```
 #[macro_export]
 macro_rules! quantify {
@@ -60,8 +63,8 @@ macro_rules! quantify {
         $crate::quantifiers::basic::all_equal($xs)
     };
 
-    (pairwise $x:ident in $xs:expr => $cond:expr) => {
-        $crate::quantifiers::basic::pairwise($xs, |$x, x_next| $cond)
+    (pairwise $a:ident, $b:ident in $xs:expr => $cond:expr) => {
+        $crate::quantifiers::structured::pairwise($xs, |$a, $b| $cond)
     };
 
     // Nested
