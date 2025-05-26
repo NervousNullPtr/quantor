@@ -270,15 +270,15 @@ impl QuantorError {
     #[must_use]
     pub fn kind(&self) -> QuantorKind {
         match self {
-            QuantorError::PredicateFailed { .. } => QuantorKind::Forall,
+            QuantorError::PredicateFailed { kind, .. } => *kind,
             QuantorError::EmptyInput { kind } => *kind,
-            QuantorError::NoMatch { .. } => QuantorKind::Exists,
-            QuantorError::UnexpectedMatch { .. } => QuantorKind::None,
-            QuantorError::NotAllEqual { .. } => QuantorKind::AllEqual,
-            QuantorError::PairwiseFailed { .. } => QuantorKind::Pairwise,
-            QuantorError::ForAllExistsFailed { .. } => QuantorKind::ForAllExists,
-            QuantorError::ExistsForAllFailed { .. } => QuantorKind::ExistsForAll,
-            QuantorError::ExactlyNFailed { .. } => QuantorKind::ExactlyN,
+            QuantorError::NoMatch { kind, .. } => *kind,
+            QuantorError::UnexpectedMatch { kind, .. } => *kind,
+            QuantorError::NotAllEqual { kind, .. } => *kind,
+            QuantorError::PairwiseFailed { kind, .. } => *kind,
+            QuantorError::ForAllExistsFailed { kind, .. } => *kind,
+            QuantorError::ExistsForAllFailed { kind, .. } => *kind,
+            QuantorError::ExactlyNFailed { kind, .. } => *kind,
             QuantorError::Custom(_) => QuantorKind::Custom,
         }
     }

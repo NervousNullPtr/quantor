@@ -110,18 +110,7 @@ macro_rules! debug_exactly_n {
         {
             match $crate::quantifiers::basic::exactly_n($xs, $count, $pred) {
                 Ok(()) => {},
-                Err(e) => {
-                    if let Some(found) = e.match_count() {
-                        println!(
-                            "[debug_exactly_n] expected exactly {}, but found {} matching elements.",
-                            $count, found
-                        );
-                    } else {
-                        println!(
-                            "[debug_exactly_n] quantifier failed, but count information was not available."
-                        );
-                    }
-                }
+                Err(e) => {println!("[debug_exactly_n] {}", e)},
             }
         }
     };
@@ -168,9 +157,12 @@ macro_rules! debug_none {
 macro_rules! debug_assert_duplicates {
     ($xs:expr) => {
         #[cfg(debug_assertions)]
-        match $crate::quantifiers::selection::assert_duplicates($xs) {
-            Ok(()) => {},
-            Err(e) => panic!("debug_assert_duplicates! failed: {}", e),
+        {
+            let candidates = $crate::quantifiers::selection::select_duplicates($xs);
+
+            if candidates.is_empty() {
+                panic!("debug_assert_duplicates! failed: {:#?}", candidates)
+            }
         }
     };
 }
@@ -205,9 +197,12 @@ macro_rules! debug_duplicates {
 macro_rules! debug_assert_unique {
     ($xs:expr) => {
         #[cfg(debug_assertions)]
-        match $crate::quantifiers::selection::assert_unique($xs) {
-            Ok(()) => {},
-            Err(e) => panic!("debug_assert_unique! failed: {}", e),
+        {
+            let candidates = $crate::quantifiers::selection::select_duplicates($xs);
+
+            if !candidates.is_empty() {
+                panic!("debug_assert_unique! failed: {:#?}", candidates)
+            }
         }
     };
 }

@@ -10,7 +10,7 @@
 /// - `exactly_one x in &a => predicate`
 /// - `exactly_n n x in &a => predicate`
 /// - `all_equal x in &a => predicate`
-/// - `pairwise x in &a => predicate`
+/// - `pairwise x,y in &a => predicate`
 /// - `forallexists x in &a, y in &b => predicate`
 /// - `existsforall x in &a, y in &b => predicate`
 ///
@@ -60,8 +60,8 @@ macro_rules! quantify {
         $crate::quantifiers::basic::all_equal($xs)
     };
 
-    (pairwise $x:ident in $xs:expr => $cond:expr) => {
-        $crate::quantifiers::basic::pairwise($xs, |$x, x_next| $cond)
+    (pairwise $x:ident,$y:ident in $xs:expr => $cond:expr) => {
+        $crate::quantifiers::structured::pairwise($xs, |$x, $y| $cond)
     };
 
     // Nested
